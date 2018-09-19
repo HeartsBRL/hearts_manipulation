@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+    <rosparam file="$(find hearts_manipulation)/hearts_arm_control/config/hearts_motions.yaml" command="load" />
+    <node name="give_receive" pkg="hearts_manipulation" type="give_receive.py" />
+</launch>
