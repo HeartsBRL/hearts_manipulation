@@ -47,8 +47,8 @@ class SphericalService(object):
         rospy.loginfo("Starting Spherical Grab Service")
         self.pick_type = PickAruco()
         rospy.loginfo("Finished SphericalService constructor")
-                self.place_gui = rospy.Service("/place_gui", Empty, self.start_aruco_place)
-                self.pick_gui = rospy.Service("/pick_gui", Empty, self.start_aruco_pick)
+        self.place_gui = rospy.Service("/place_gui", Empty, self.start_aruco_place)
+        self.pick_gui = rospy.Service("/pick_gui", Empty, self.start_aruco_pick)
 
     def start_aruco_pick(self, req):
         self.pick_type.pick_aruco("pick")
@@ -61,11 +61,11 @@ class SphericalService(object):
 class PickAruco(object):
     def __init__(self):
         rospy.loginfo("Initalizing...")
-                self.bridge = CvBridge()
+        self.bridge = CvBridge()
         self.tf_l = tf.TransformListener()
         rospy.loginfo("Waiting for /pickup_pose AS...")
         self.pick_as = SimpleActionClient('/pickup_pose', PickUpPoseAction)
-                time.sleep(1.0)
+        time.sleep(1.0)
         if not self.pick_as.wait_for_server(rospy.Duration(20)):
             rospy.logerr("Could not connect to /pickup_pose AS")
             exit()
