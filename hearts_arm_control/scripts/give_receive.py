@@ -14,13 +14,15 @@ def do_it(x):
 #tell the client to send the goal
     pmc.send_goal(pmg)    
 
-
+rospy.init_node("give_receive")
 pmc = actionlib.SimpleActionClient("play_motion", PlayMotionAction)
 pmc.wait_for_server
 
-rospy.subscriber("motion_name", String, do_it)
+rospy.Subscriber("motion_name", String, do_it)
+
+rospy.spin()
 
 
 
-if __name__ == '__main__':    
-    rospy.init_node("give_receive")
+#if __name__ == '__main__':    
+    
