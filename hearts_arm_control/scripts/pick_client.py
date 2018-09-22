@@ -49,15 +49,10 @@ class SphericalService(object):
         rospy.loginfo("Starting Spherical Grab Service")
         self.pick_type = PickAruco()
         rospy.loginfo("Finished SphericalService constructor")
-                self.place_gui = rospy.Service("/place_gui", Empty, self.start_aruco_place)
-                self.pick_gui = rospy.Service("/pick_gui", Empty, self.start_aruco_pick)
+        self.pick_gui = rospy.Service("/pick_gui", Empty, self.start_aruco_pick)
 
     def start_aruco_pick(self, req):
         self.pick_type.pick_aruco("pick")
-        return {}
-
-    def start_aruco_place(self, req):
-        self.pick_type.pick_aruco("place")
         return {}
 
 class PickAruco(object):
@@ -73,10 +68,6 @@ class PickAruco(object):
         if not self.pick_as.wait_for_server(rospy.Duration(20)):
             rospy.logerr("Could not connect to /pickup_pose AS")
             exit()
-        rospy.loginfo("Waiting for /place_pose AS...")
-        self.place_as = SimpleActionClient('/place_pose', PickUpPoseAction)
-
-        self.place_as.wait_for_server()
 
         rospy.loginfo("Setting publishers to torso and head controller...")
         self.torso_cmd = rospy.Publisher(
@@ -118,7 +109,8 @@ class PickAruco(object):
         #PoseStamped is the messgage type published to /detected_aruco_pose
         ps = PoseStamped()
         ps.pose.position = aruco_pose.pose.position
-        ps.header.stamp = self.tfBuffer.get_latest_common_time("base_footprint", aruco_pose.header.frame_id)
+        ps.header.stamp = self.tfBuffer.get_latest_common_time("base_footprint",
+                                                     aruco_pose.header.frame_id)
         ps.header.frame_id = aruco_pose.header.frame_id
         #Loop until transform is done
         transform_ok = False
@@ -134,7 +126,8 @@ class PickAruco(object):
                     "Exception on transforming point... trying again \n(" +
                     str(e) + ")")
                 rospy.sleep(0.01)
-                ps.header.stamp = self.tfBuffer.get_latest_common_time("base_footprint", aruco_pose.header.frame_id)
+                ps.header.stamp = self.tfBuffer.get_latest_common_time("base_footprint",
+                                                     aruco_pose.header.frame_id)
             #define goal that will be sent to pick_and_place_server
             pick_g = PickUpPoseGoal()
 
@@ -160,8 +153,8 @@ class PickAruco(object):
                 rospy.logerr("Failed to pick, not trying further")
                 return
 
-            # Move torso to its maximum height
-            self.lift_torso()
+            '''# Move torso to its maximum height
+            #self.lift_torso()
 
             # Raise arm
             rospy.loginfo("Moving arm to a safe pose")
@@ -178,7 +171,7 @@ class PickAruco(object):
             rospy.loginfo("Done!")
         
  
-        def lift_torso(self):
+    def lift_torso(self):
         rospy.loginfo("Moving torso up")
         jt = JointTrajectory()
         jt.joint_names = ['torso_lift_joint']
@@ -188,7 +181,7 @@ class PickAruco(object):
         jt.points.append(jtp)
         self.torso_cmd.publish(jt)
 
-        def lower_head(self):
+    def lower_head(self):
         rospy.loginfo("Moving head down")
         jt = JointTrajectory()
         jt.joint_names = ['head_1_joint', 'head_2_joint']
@@ -209,7 +202,7 @@ class PickAruco(object):
 
         self.lower_head()
 
-        rospy.loginfo("Robot prepared.")
+        rospy.loginfo("Robot prepared.")'''
 
 
 if __name__ == '__main__':

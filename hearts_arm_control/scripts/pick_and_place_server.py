@@ -64,7 +64,7 @@ def createPickupGoal(group="arm_torso", target="part",
     return pug
 
 
-def createPlaceGoal(place_pose,
+'''def createPlaceGoal(place_pose,
                     place_locations,
                     group="arm_torso",
                     target="part",
@@ -83,7 +83,7 @@ def createPlaceGoal(place_pose,
     placeg.allowed_touch_objects = ['<octomap>']
     placeg.allowed_touch_objects.extend(links_to_allow_contact)
 
-    return placeg
+    return placeg'''
 
 class PickAndPlaceServer(object):
     def __init__(self):
@@ -93,10 +93,10 @@ class PickAndPlaceServer(object):
         self.pickup_ac = SimpleActionClient('/pickup', PickupAction)
         self.pickup_ac.wait_for_server()
         rospy.loginfo("Succesfully connected.")
-        rospy.loginfo("Connecting to place AS")
+        '''rospy.loginfo("Connecting to place AS")
         self.place_ac = SimpleActionClient('/place', PlaceAction)
         self.place_ac.wait_for_server()
-        rospy.loginfo("Succesfully connected.")
+        rospy.loginfo("Succesfully connected.")'''
         self.scene = PlanningSceneInterface()
         rospy.loginfo("Connecting to /get_planning_scene service")
         self.scene_srv = rospy.ServiceProxy(
@@ -127,10 +127,10 @@ class PickAndPlaceServer(object):
             execute_cb=self.pick_cb, auto_start=False)
         self.pick_as.start()
 
-        self.place_as = SimpleActionServer(
+        '''self.place_as = SimpleActionServer(
             '/place_pose', PickUpPoseAction,
             execute_cb=self.place_cb, auto_start=False)
-        self.place_as.start()
+        self.place_as.start()'''
 
     def pick_cb(self, goal):
         """
@@ -144,7 +144,7 @@ class PickAndPlaceServer(object):
         else:
             self.pick_as.set_succeeded(p_res)
 
-    def place_cb(self, goal):
+    '''def place_cb(self, goal):
         """
         :type goal: PickUpPoseGoal
         """
@@ -154,7 +154,7 @@ class PickAndPlaceServer(object):
         if error_code != 1:
             self.place_as.set_aborted(p_res)
         else:
-            self.place_as.set_succeeded(p_res)
+            self.place_as.set_succeeded(p_res)'''
 
     def wait_for_planning_scene_object(self, object_name='part'):
         rospy.loginfo(
@@ -176,11 +176,13 @@ class PickAndPlaceServer(object):
 
         rospy.loginfo("'" + object_name + "'' is in scene!")
 
+    #HEARTS tried inputting multiple cubes to approximate cylinder
+    #TODO re-investigate if time allows
     #def rotate_quat(self,quat,angle_deg,axis_euler):
-     #   '''
-      #  Rotate about axis_euler by angle_deg,the quaternion quat,
-       # returned as a quaternion
-        #'''
+        '''
+        Rotate about axis_euler by angle_deg,the quaternion quat,
+        returned as a quaternion
+        '''
         #euler = tf.transformations.euler_from_quaternion(quat)
         #euler(2) = euler(0.5*np.pi)
         
@@ -199,7 +201,8 @@ class PickAndPlaceServer(object):
         part_pose = copy.deepcopy(object_pose)
         part_pose.pose.position.z -= self.object_height/4
         #Add object description in scene
-        self.scene.add_box("part", part_pose, (self.object_depth, self.object_width, self.object_height))
+        self.scene.add_box("part", part_pose, (self.object_depth, self.object_width,
+                                               self.object_height))
         
         # Add rotated boxes (for collision avoidance)
         #box1_pose = copy.deepcopy(object_pose)
@@ -211,13 +214,14 @@ class PickAndPlaceServer(object):
         table_height = object_pose.pose.position.z - self.object_height  
         table_width  = 1.8
         table_depth  = 0.5
+        #TODO update so it works when detecting centre of object
         table_pose.pose.position.z += -(2*self.object_height)/2 -table_height/2
         table_height -= 0.008 #remove few milimeters to prevent contact between the object and the table
 
         self.scene.add_box("table", table_pose, (table_depth, table_width, table_height))
 
         # # We need to wait for the object part to appear
-        self.wait_for_planning_scene_object()
+        self.wait_for_planning_scene_object("part")
         self.wait_for_planning_scene_object("table")
 
         # compute grasps
@@ -238,7 +242,7 @@ class PickAndPlaceServer(object):
 
         return result.error_code.val
 
-    def place_object(self, object_pose):
+    '''def place_object(self, object_pose):
         rospy.loginfo("Clearing octomap")
         self.clear_octomap_srv.call(EmptyRequest())
         possible_placings = self.sg.create_placings_from_object_pose(
@@ -276,7 +280,7 @@ class PickAndPlaceServer(object):
         rospy.loginfo("Removing previous 'part' object")
         self.scene.remove_world_object("part")
 
-        return result.error_code.val
+        return result.error_code.val'''
 
 
 if __name__ == '__main__':
