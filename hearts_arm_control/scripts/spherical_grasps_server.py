@@ -79,7 +79,9 @@ def quaternion_from_vectors(v0, v1):
 
 def filter_poses(sphere_poses, object_pose,
                  filter_behind=False,
-                 filter_under=True):
+                 filter_under=True,
+                 filter_over=False,
+                 filter_left=False):
     """Given the generated poses and the object pose
     filter out the poses that are behind or under (if set to True)
     :type sphere_poses: []
@@ -94,7 +96,14 @@ def filter_poses(sphere_poses, object_pose,
                 continue
         # if pose if under the object, ditch it
         if filter_under:
-            if pose.position.z < object_pose.pose.position.z:
+            if pose.position.z < object_pose.pose.position.z-0.05:
+                continue
+        # if pose if over the object, ditch it
+        if filter_over:
+            if pose.position.z > object_pose.pose.position.z+0.05:
+                continue
+        if filter_left:
+            if pose.position.y > object_pose.pose.position.y+0.05:
                 continue
 
         new_list.append(pose)
@@ -105,7 +114,9 @@ def sort_by_height(sphere_poses):
     # We prefer to grasp from top to be safer
     newlist = sorted(
         sphere_poses, key=lambda item: item.position.z, reverse=False)
-    sorted_list = newlist
+    newerlist = sorted(
+        newlist, key=lambda item: item.position.x, reverse=False)
+    sorted_list = newerlist
     return sorted_list
 
 
@@ -353,7 +364,7 @@ class SphericalGrasps(object):
         tini = rospy.Time.now()
         sphere_poses = self.generate_grasp_poses(object_pose)
         filtered_poses = filter_poses(sphere_poses, object_pose,
-                                      filter_behind=False, filter_under=True)
+                                      filter_behind=False, filter_under=True, filter_over=False, filter_left=True)
         sorted_poses = sort_by_height(filtered_poses)
         grasps = self.create_grasps_from_poses(sorted_poses)
         tend = rospy.Time.now()
@@ -365,7 +376,7 @@ class SphericalGrasps(object):
         self.publish_object_marker(object_pose)
         return grasps
 
-    def create_placings_from_object_pose(self, posestamped):
+    '''def create_placings_from_object_pose(self, posestamped):
         """ Create a list of PlaceLocation of the object rotated every 15deg"""
         place_locs = []
         pre_grasp_posture = JointTrajectory()
@@ -395,7 +406,7 @@ class SphericalGrasps(object):
             pl.post_place_posture = pre_grasp_posture
             place_locs.append(pl)
 
-        return place_locs
+        return place_locs'''
 
     def createGripperTranslation(self, direction_vector,
                                  desired_distance=0.15,

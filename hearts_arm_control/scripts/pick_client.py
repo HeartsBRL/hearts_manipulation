@@ -27,7 +27,9 @@ from geometry_msgs.msg import PoseStamped, Pose
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 from actionlib import SimpleActionClient
-import tf
+
+import tf2_ros
+from tf2_geometry_msgs import do_transform_pose
 
 import numpy as np
 from std_srvs.srv import Empty
@@ -47,8 +49,8 @@ class SphericalService(object):
         rospy.loginfo("Starting Spherical Grab Service")
         self.pick_type = PickAruco()
         rospy.loginfo("Finished SphericalService constructor")
-        self.place_gui = rospy.Service("/place_gui", Empty, self.start_aruco_place)
-        self.pick_gui = rospy.Service("/pick_gui", Empty, self.start_aruco_pick)
+                self.place_gui = rospy.Service("/place_gui", Empty, self.start_aruco_place)
+                self.pick_gui = rospy.Service("/pick_gui", Empty, self.start_aruco_pick)
 
     def start_aruco_pick(self, req):
         self.pick_type.pick_aruco("pick")
@@ -61,11 +63,13 @@ class SphericalService(object):
 class PickAruco(object):
     def __init__(self):
         rospy.loginfo("Initalizing...")
-        self.bridge = CvBridge()
-        self.tf_l = tf.TransformListener()
+                self.bridge = CvBridge()
+        self.tfBuffer = tf2_ros.Buffer()
+                self.tf_l = tf2_ros.TransformListener(self.tfBuffer)
+                
         rospy.loginfo("Waiting for /pickup_pose AS...")
         self.pick_as = SimpleActionClient('/pickup_pose', PickUpPoseAction)
-        time.sleep(1.0)
+                time.sleep(1.0)
         if not self.pick_as.wait_for_server(rospy.Duration(20)):
             rospy.logerr("Could not connect to /pickup_pose AS")
             exit()
@@ -92,42 +96,54 @@ class PickAruco(object):
         rospy.loginfo("Connected!")
         rospy.sleep(1.0)
         rospy.loginfo("Done initializing PickAruco.")
+
+    def strip_leading_slash(self, s):
+        return s[1:] if s.startswith("/") else s
         
     def pick_aruco(self, string_operation):
-        self.prepare_robot()
+        #self.prepare_robot()
 
         rospy.sleep(2.0)
         rospy.loginfo("spherical_grasp_gui: Waiting for an aruco detection")
 
+        #wait for aruco to be detected
+        #TODO integrate with vision team's code
         aruco_pose = rospy.wait_for_message('/aruco_single/pose', PoseStamped)
+        aruco_pose.header.frame_id = self.strip_leading_slash(aruco_pose.header.frame_id)
         rospy.loginfo("Got: " + str(aruco_pose))
 
+
         rospy.loginfo("spherical_grasp_gui: Transforming from frame: " +
-                      aruco_pose.header.frame_id + " to 'base_footprint'")
+        aruco_pose.header.frame_id + " to 'base_footprint'")
+        #PoseStamped is the messgage type published to /detected_aruco_pose
         ps = PoseStamped()
         ps.pose.position = aruco_pose.pose.position
-        ps.header.stamp = self.tf_l.getLatestCommonTime(
-            "base_footprint", aruco_pose.header.frame_id)
+        ps.header.stamp = self.tfBuffer.get_latest_common_time("base_footprint", aruco_pose.header.frame_id)
         ps.header.frame_id = aruco_pose.header.frame_id
+        #Loop until transform is done
         transform_ok = False
         while not transform_ok and not rospy.is_shutdown():
             try:
-                aruco_ps = self.tf_l.transformPose("/base_footprint", ps)
+                transform = self.tfBuffer.lookup_transform("base_footprint", 
+                                       ps.header.frame_id,
+                                       rospy.Time(0))
+                aruco_ps = do_transform_pose(ps, transform)
                 transform_ok = True
-            except tf.ExtrapolationException as e:
+            except tf2_ros.ExtrapolationException as e:
                 rospy.logwarn(
                     "Exception on transforming point... trying again \n(" +
                     str(e) + ")")
                 rospy.sleep(0.01)
-                ps.header.stamp = self.tf_l.getLatestCommonTime(
-                    "base_footprint", aruco_pose.header.frame_id)
+                ps.header.stamp = self.tfBuffer.get_latest_common_time("base_footprint", aruco_pose.header.frame_id)
+            #define goal that will be sent to pick_and_place_server
             pick_g = PickUpPoseGoal()
 
+        #argument defined during service call
         if string_operation == "pick":
 
             rospy.loginfo("Setting cube pose based on ArUco detection")
             pick_g.object_pose.pose.position = aruco_ps.pose.position
-            pick_g.object_pose.pose.position.z -= 0.1*(1.0/2.0)
+            pick_g.object_pose.pose.position.z -= 0.1
 
             rospy.loginfo("aruco pose in base_footprint:" + str(pick_g))
 
@@ -135,6 +151,7 @@ class PickAruco(object):
             pick_g.object_pose.pose.orientation.w = 1.0
             self.detected_pose_pub.publish(pick_g.object_pose)
             rospy.loginfo("Gonna pick:" + str(pick_g))
+            #pick_as action client sends the PickUpPoseGoal
             self.pick_as.send_goal_and_wait(pick_g)
             rospy.loginfo("Done!")
 
@@ -154,8 +171,14 @@ class PickAruco(object):
             self.play_m_as.send_goal_and_wait(pmg)
             rospy.loginfo("Raise object done.")
 
-
-    def lift_torso(self):
+            # Place the object back to its position
+            rospy.loginfo("Gonna place near where it was")
+            pick_g.object_pose.pose.position.z += 0.05
+            self.place_as.send_goal_and_wait(pick_g)
+            rospy.loginfo("Done!")
+        
+ 
+        def lift_torso(self):
         rospy.loginfo("Moving torso up")
         jt = JointTrajectory()
         jt.joint_names = ['torso_lift_joint']
@@ -165,7 +188,7 @@ class PickAruco(object):
         jt.points.append(jtp)
         self.torso_cmd.publish(jt)
 
-    def lower_head(self):
+        def lower_head(self):
         rospy.loginfo("Moving head down")
         jt = JointTrajectory()
         jt.joint_names = ['head_1_joint', 'head_2_joint']
@@ -173,17 +196,19 @@ class PickAruco(object):
         jtp.positions = [0.0, -0.75]
         jtp.time_from_start = rospy.Duration(2.0)
         jt.points.append(jtp)
-        self.head_cmd.publish(jt)
-        rospy.loginfo("Done.")
+        #self.head_cmd.publish(jt)
+                rospy.loginfo("Done.")
 
     def prepare_robot(self):
         rospy.loginfo("Unfold arm safely")
         pmg = PlayMotionGoal()
         pmg.motion_name = 'pregrasp'
         pmg.skip_planning = False
-        self.play_m_as.send_goal_and_wait(pmg)
+        #self.play_m_as.send_goal_and_wait(pmg)
         rospy.loginfo("Done.")
+
         self.lower_head()
+
         rospy.loginfo("Robot prepared.")
 
 
