@@ -34,6 +34,7 @@ from std_srvs.srv import Empty, EmptyRequest
 from copy import deepcopy
 from random import shuffle
 import copy
+from std_msgs.msg import Float64
 
 moveit_error_dict = {}
 for name in MoveItErrorCodes.__dict__.keys():
@@ -110,7 +111,11 @@ class PickAndPlaceServer(object):
         self.clear_octomap_srv.wait_for_service()
         rospy.loginfo("Connected!")
 
-        rospy.subscriber("height", Float64, set_height)
+        def set_height(height):
+            self.object_height = height.data
+            rospy.loginfo("Object height set to " + str(self.object_height))
+
+        rospy.Subscriber("height", Float64, set_height)
 
         # Get the object size
         self.object_height = rospy.get_param('~object_height')
@@ -134,8 +139,7 @@ class PickAndPlaceServer(object):
             execute_cb=self.place_cb, auto_start=False)
         self.place_as.start()'''
 
-    def set_height(height):
-        self.object_height = height.data
+
 
     def pick_cb(self, goal):
         """
