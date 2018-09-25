@@ -110,6 +110,8 @@ class PickAndPlaceServer(object):
         self.clear_octomap_srv.wait_for_service()
         rospy.loginfo("Connected!")
 
+        rospy.subscriber("height", Float64, set_height)
+
         # Get the object size
         self.object_height = rospy.get_param('~object_height')
         self.object_width = rospy.get_param('~object_width')
@@ -131,6 +133,9 @@ class PickAndPlaceServer(object):
             '/place_pose', PickUpPoseAction,
             execute_cb=self.place_cb, auto_start=False)
         self.place_as.start()'''
+
+    def set_height(height):
+        self.object_height = height.data
 
     def pick_cb(self, goal):
         """

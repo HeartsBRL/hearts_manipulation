@@ -1,0 +1,4 @@
+To run the pick code, be sure to copy the relevant contents of the src, config,
+launch and cfg files into their respective folders in 
+tiago_public_ws/src/tiago_tutorials/tiago_pick_demo and launch them from there
+(terminal sourced at tiago_pick_demo/devel/setup.bash)
