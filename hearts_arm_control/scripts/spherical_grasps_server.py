@@ -379,7 +379,7 @@ class SphericalGrasps(object):
         # Publishing PoseArrays for debugging pourposes
         self.publish_poses(sphere_poses)
         self.publish_grasps(grasps)
-        self.publish_object_marker(object_pose)
+        #self.publish_object_marker(object_pose)
         return grasps
 
         #HEARTS commented out as not intending to place

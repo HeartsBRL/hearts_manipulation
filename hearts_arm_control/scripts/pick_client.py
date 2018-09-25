@@ -58,13 +58,13 @@ class SphericalService(object):
 class PickAruco(object):
     def __init__(self):
         rospy.loginfo("Initalizing...")
-                self.bridge = CvBridge()
+            #self.bridge = CvBridge()
         self.tfBuffer = tf2_ros.Buffer()
-                self.tf_l = tf2_ros.TransformListener(self.tfBuffer)
+        self.tf_l = tf2_ros.TransformListener(self.tfBuffer)
                 
         rospy.loginfo("Waiting for /pickup_pose AS...")
         self.pick_as = SimpleActionClient('/pickup_pose', PickUpPoseAction)
-                time.sleep(1.0)
+        time.sleep(1.0)
         if not self.pick_as.wait_for_server(rospy.Duration(20)):
             rospy.logerr("Could not connect to /pickup_pose AS")
             exit()

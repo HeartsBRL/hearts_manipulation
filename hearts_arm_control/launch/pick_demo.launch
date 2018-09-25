@@ -2,17 +2,17 @@
 <launch>
 
   <!-- marker detector -->
-  <node pkg="aruco_ros" type="single"  name="aruco_single">
+  <!--node pkg="aruco_ros" type="single"  name="aruco_single">
       <remap from="/camera_info"       to="/xtion/rgb/camera_info" />
       <remap from="/image"             to="/xtion/rgb/image_rect_color" />
       <param name="image_is_rectified" value="True"/>
       <param name="marker_size"        value="0.045"/>
       <param name="marker_id"          value="582"/>
-      <param name="reference_frame"    value="/base_footprint"/>   <!-- frame in which the marker pose will be expressed -->
+      <param name="reference_frame"    value="/base_footprint"/>   
       <param name="camera_frame"       value="xtion_rgb_optical_frame"/>
       <param name="marker_frame"       value="aruco_frame" />
       <param name="corner_refinement"  value="SUBPIX" />
-  </node>
+  </node-->
 
   <!-- Load definition of pregrasp motion into play_motion namespace -->
   <rosparam command="load" file="$(find hearts_arm_control)/config/pick_motions.yaml" /> 
