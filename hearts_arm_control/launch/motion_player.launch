@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+    <rosparam file="$(find hearts_arm_control)/config/hearts_motions.yaml" command="load" />
+    <node name="motion_player" pkg="hearts_arm_control" type="motion_player.py" />
+    <node name="tiago_tts" pkg="hearts_tts" type="tiago_tts.py" />
+    <node name="frame_control" pkg="hearts_navigation" type="frames.py" />
+</launch>
