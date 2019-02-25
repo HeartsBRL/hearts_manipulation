@@ -24,6 +24,7 @@ import rospy
 from std_msgs.msg import String
 
 rospy.init_node("justfuckinpickituuuuuuuup")
+rospy.sleep(1)
 pb = rospy.Publisher("/pick_it", String, queue_size=1)
 rospy.sleep(1)
 pb.publish('x')

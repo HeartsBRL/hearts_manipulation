@@ -61,7 +61,7 @@ class PickAruco(object):
             #self.bridge = CvBridge()
         self.tfBuffer = tf2_ros.Buffer()
         self.tf_l = tf2_ros.TransformListener(self.tfBuffer)
-                
+
         rospy.loginfo("Waiting for /pickup_pose AS...")
         self.pick_as = SimpleActionClient('/pickup_pose', PickUpPoseAction)
         time.sleep(1.0)
@@ -90,7 +90,7 @@ class PickAruco(object):
 
     def strip_leading_slash(self, s):
         return s[1:] if s.startswith("/") else s
-        
+
     def pick_aruco(self, string_operation):
         #self.prepare_robot()
 
@@ -116,7 +116,7 @@ class PickAruco(object):
         transform_ok = False
         while not transform_ok and not rospy.is_shutdown():
             try:
-                transform = self.tfBuffer.lookup_transform("base_footprint", 
+                transform = self.tfBuffer.lookup_transform("base_footprint",
                                        ps.header.frame_id,
                                        rospy.Time(0))
                 aruco_ps = do_transform_pose(ps, transform)
@@ -145,6 +145,8 @@ class PickAruco(object):
             self.detected_pose_pub.publish(pick_g.object_pose)
             rospy.loginfo("Gonna pick:" + str(pick_g))
             #pick_as action client sends the PickUpPoseGoal
+
+            #rospy.wait_for_message('/pick_it', String)
             self.pick_as.send_goal_and_wait(pick_g)
             rospy.loginfo("Done!")
 
@@ -153,7 +155,7 @@ class PickAruco(object):
                 rospy.logerr("Failed to pick, not trying further")
                 return
 
-            '''# Move torso to its maximum height
+            # Move torso to its maximum height
             #self.lift_torso()
 
             # Raise arm
@@ -165,13 +167,13 @@ class PickAruco(object):
             rospy.loginfo("Raise object done.")
 
             # Place the object back to its position
-            rospy.loginfo("Gonna place near where it was")
-            pick_g.object_pose.pose.position.z += 0.05
-            self.place_as.send_goal_and_wait(pick_g)
-            rospy.loginfo("Done!")
-        
- 
-    def lift_torso(self):
+            #rospy.loginfo("Gonna place near where it was")
+            #pick_g.object_pose.pose.position.z += 0.05
+            #self.place_as.send_goal_and_wait(pick_g)
+            #rospy.loginfo("Done!")
+
+
+    '''def lift_torso(self):
         rospy.loginfo("Moving torso up")
         jt = JointTrajectory()
         jt.joint_names = ['torso_lift_joint']
@@ -179,7 +181,7 @@ class PickAruco(object):
         jtp.positions = [0.34]
         jtp.time_from_start = rospy.Duration(2.5)
         jt.points.append(jtp)
-        self.torso_cmd.publish(jt)
+        self.torso_cmd.publish(jt)'''
 
     def lower_head(self):
         rospy.loginfo("Moving head down")
@@ -190,23 +192,22 @@ class PickAruco(object):
         jtp.time_from_start = rospy.Duration(2.0)
         jt.points.append(jtp)
         #self.head_cmd.publish(jt)
-                rospy.loginfo("Done.")
+        rospy.loginfo("Done.")
 
     def prepare_robot(self):
         rospy.loginfo("Unfold arm safely")
         pmg = PlayMotionGoal()
         pmg.motion_name = 'pregrasp'
         pmg.skip_planning = False
-        #self.play_m_as.send_goal_and_wait(pmg)
+        self.play_m_as.send_goal_and_wait(pmg)
         rospy.loginfo("Done.")
 
         self.lower_head()
 
-        rospy.loginfo("Robot prepared.")'''
+        rospy.loginfo("Robot prepared.")
 
 
 if __name__ == '__main__':
     rospy.init_node('pick_aruco_demo')
     sphere = SphericalService()
     rospy.spin()
-

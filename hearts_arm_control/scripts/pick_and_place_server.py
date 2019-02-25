@@ -170,7 +170,7 @@ class PickAndPlaceServer(object):
             "Waiting for object '" + object_name + "'' to appear in planning scene...")
         gps_req = GetPlanningSceneRequest()
         gps_req.components.components = gps_req.components.WORLD_OBJECT_NAMES
-        
+
         part_in_scene = False
         while not rospy.is_shutdown() and not part_in_scene:
             # This call takes a while when rgbd sensor is set
@@ -194,7 +194,7 @@ class PickAndPlaceServer(object):
         '''
         #euler = tf.transformations.euler_from_quaternion(quat)
         #euler(2) = euler(0.5*np.pi)
-        
+
 
     def grasp_object(self, object_pose):
         rospy.loginfo("Removing any previous 'part' object")
@@ -212,19 +212,19 @@ class PickAndPlaceServer(object):
         #Add object description in scene
         self.scene.add_box("part", part_pose, (self.object_depth, self.object_width,
                                                self.object_height))
-        
+
         # Add rotated boxes (for collision avoidance)
         #box1_pose = copy.deepcopy(object_pose)
-        
+
         rospy.loginfo("Second%s", object_pose.pose)
         table_pose = copy.deepcopy(object_pose)
 
         #define a virtual table below the object
-        table_height = object_pose.pose.position.z - self.object_height  
+        table_height = object_pose.pose.position.z - self.object_height
         table_width  = 1.8
         table_depth  = 0.5
         #TODO update so it works when detecting centre of object
-        table_pose.pose.position.z += -(2*self.object_height)/2 -table_height/2
+        table_pose.pose.position.z += -(self.object_height)/2 -table_height/2
         table_height -= 0.008 #remove few milimeters to prevent contact between the object and the table
 
         self.scene.add_box("table", table_pose, (table_depth, table_width, table_height))
@@ -238,7 +238,10 @@ class PickAndPlaceServer(object):
         self.pickup_ac
         goal = createPickupGoal(
             "arm_torso", "part", object_pose, possible_grasps, self.links_to_allow_contact)
-        
+
+        rospy.loginfo("Waiting for final pick instruction")
+        rospy.wait_for_message('/pick_it',String)
+
         rospy.loginfo("Sending goal")
         self.pickup_ac.send_goal(goal)
         rospy.loginfo("Waiting for result")
@@ -281,7 +284,7 @@ class PickAndPlaceServer(object):
             self.place_ac.wait_for_result()
             result = self.place_ac.get_result()
             rospy.logerr(str(moveit_error_dict[result.error_code.val]))
-        
+
         # print result
         rospy.loginfo(
             "Result: " +
