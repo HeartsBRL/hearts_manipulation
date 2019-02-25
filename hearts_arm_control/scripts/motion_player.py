@@ -25,4 +25,4 @@ rospy.Subscriber("motion_name", String, do_motion)
 
 if __name__ == '__main__':
     rospy.init_node("motion_player")
-rospy.spin()
+    rospy.spin()
