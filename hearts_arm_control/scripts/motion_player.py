@@ -8,19 +8,21 @@ from std_msgs.msg import String
 
 def do_motion(x):
 #create the play motion goal and tell it which motion to perform
+    print("doing motion")
     pmg = PlayMotionGoal()
-    pmg.motion_name = x
+    pmg.motion_name = x.data
     pmg.skip_planning = False
 #tell the client to send the goal
-    pmc.send_goal(pmg)    
+    pmc.send_goal_and_wait(pmg)
 
 
 pmc = actionlib.SimpleActionClient("play_motion", PlayMotionAction)
 pmc.wait_for_server
 
-rospy.subscriber("motion_name", String, do_motion)
+rospy.Subscriber("motion_name", String, do_motion)
 
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     rospy.init_node("motion_player")
+rospy.spin()

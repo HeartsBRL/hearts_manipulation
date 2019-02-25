@@ -369,7 +369,7 @@ class SphericalGrasps(object):
         tini = rospy.Time.now()
         sphere_poses = self.generate_grasp_poses(object_pose)
         filtered_poses = filter_poses(sphere_poses, object_pose,
-                                      filter_behind=False, filter_under=True,
+                                      filter_behind=True, filter_under=True,
                                       filter_over=False, filter_left=True)
         sorted_poses = sort_by_height(filtered_poses)
         grasps = self.create_grasps_from_poses(sorted_poses)
