@@ -56,3 +56,75 @@ play_motion:
         name: look_into_my_eyes
         usage: erl
         description: 'facial recognition position'
+        
+        
+    cup_pos_1:
+      joints: ['torso_lift_joint', 'arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+      points:
+      - positions: [0.0, 1.61, -0.93, -3.14, 1.83, -1.577, -0.62, 0.04]
+        time_from_start: 5.0
+      meta:
+        name: cup_pos_1
+        usage: PE
+        description: 'prep to get cup, away from the table'
+        
+    cup_pos_2:
+      joints: ['torso_lift_joint', 'arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+      points:
+      - positions: [0.0, 1.62, -0.44, -3.14, 1.14, -1.577, -0.62, 0.04]
+        time_from_start: 5.0
+      meta:
+        name: cup_pos_2
+        usage: PE
+        description: 'prep to get cup 2, on the table'
+     
+    cup_open:
+      joints: ['gripper_right_finger_joint','gripper_left_finger_joint']
+      points:
+      - positions: [0.05,0.05]
+        time_from_start: 5.0
+      meta:
+        name: cup_open
+        usage: PE
+        description: 'open gripper'
+           
+    cup_closed:
+      joints: ['gripper_right_finger_joint','gripper_left_finger_joint']
+      points:
+      - positions: [0.033,0.033]
+        time_from_start: 5.0
+      meta:
+        name: cup_closed
+        usage: PE
+        description: 'closed gripper'
+        
+        
+    cup_pos_4:
+      joints: ['torso_lift_joint', 'arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+      points:
+      - positions: [0.0, 1.78, -0.01, -3.13, 0.74, -1.577, -0.62, 0.04]
+        time_from_start: 5.0
+      meta:
+        name: cup_pos_4
+        usage: PE
+        description: 'cup pos 4, lifted the cup'
+
+    cup_pos_5:
+      joints: ['torso_lift_joint', 'arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+      points:
+      - positions: [0.0, 2.09, -0.34, -3.19, 0.96, -1.577, -0.62, 0.04]
+        time_from_start: 5.0
+      meta:
+        name: cup_pos_5
+        usage: PE
+        description: 'finish position closed gripper'
+
+    cup_pos_6:
+      joints: ['torso_lift_joint', 'arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+      points:
+      - positions: [0.0, 2.18, -0.85, -3.26, 1.77, -1.577, -0.62, 0.04]
+        time_from_start: 5.0
+      meta:
+        name: cup_pos_6
+        usage: PE
+        description: 'retreat position after placing'
