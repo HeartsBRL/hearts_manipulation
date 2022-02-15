@@ -67,4 +67,36 @@ Now source the file
 source ~/.bashrc
 ```
 
-It is recomended to open a new tab after sourcing bashrc
+It is recomended to open a new tab after sourcing bashrc.
+
+Follow the instructions given on [these page](https://emanual.robotis.com/docs/en/parts/controller/opencr10/#install-on-linux) ater this steps for arduino setup.
+
+#### Installing Processor
+
+Processor is the main gui were you can see the state of the manipulator and also control it.
+
+Download processing using [this link]( https://processing.org/download/).
+
+Now check the downloaded file for a file named as "processing". and launch the same file with terminal. In my system it was something like this:
+
+```
+/home/hearts/Downloads/processing-4.0b2/processing
+```
+Follow the instruction on [this page](https://emanual.robotis.com/docs/en/platform/openmanipulator_x/quick_start_guide/#install-ros-on-pc) for initiating processing for open manipulator.
+
+### Introduction to the Interface
+
+After launching the processing you will see two windows one of them will show you the state of the manipulator and the other one will show the controll pannel. 
+
+At the very top of controll interface you will see 4 sections which are discussed below:
+
+#### Joint space
+![Screenshot from 2022-02-15 15-58-30](https://user-images.githubusercontent.com/50763982/154103049-a439ff97-e625-4566-9b37-8cfb044fb96f.png)
+
+Selecting Controller ON will enable immediate use of BASIC and ORIGIN options which are two stable states of the manipulator. Before selecting basic do not forget to support the manipulator otherwise it may trip.
+
+Changing joint angle of any knob between 1-4 will set that joint at that same angle. The gripper can only act either in Gripper Open or Close state. 
+
+
+
+
